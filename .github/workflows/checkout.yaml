@@ -5,7 +5,7 @@ jobs:
   clone-repos:
     name: clone another repos
     runs-on: 
-      labels: python-runner
+      labels: test01
     steps:
       - uses: actions/checkout@v4
         with:
