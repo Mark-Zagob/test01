@@ -1,19 +1,15 @@
 name: Checkout-test
-
 on: 
   workflow_dispatch:
-
 jobs:
-  build:
+  clone-repos:
+    name: clone another repos
     runs-on: 
       labels: python-runner
-
-      steps:
-      - name: Check out other repos
-        uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
         with:
           repository: Mark-Zagob/multibranch
           ref: branch111
-
       - name: check location
         run: pwd && ls -la
