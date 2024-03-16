@@ -10,7 +10,7 @@ dag = DAG(
     schedule_interval=None,
 )
 download = BashOperator(
-    task_id="donwload",
+    task_id="download",
     bash_command="curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
     dag = dag,
 )
