@@ -42,4 +42,4 @@ notify = BashOperator(
     dag=dag,
 )
 
-dwn >> get_pictures >> notify
+download >> get_pictures >> notify
