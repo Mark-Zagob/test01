@@ -11,7 +11,7 @@ dag = DAG(
 )
 download = BashOperator(
     task_id="download",
-    bash_command="pwd && ls -la && curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
+    bash_command="curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming' && ls -la",
     dag = dag,
 )
 
