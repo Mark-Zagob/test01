@@ -1,4 +1,4 @@
-import json, pathlib, airflow, requests
+import json, pathlib, airflow, requests, os
 import requests.exceptions as requests_exceptions
 from airflow import DAG
 from airflow.operators.bash import BashOperator
@@ -11,14 +11,15 @@ dag = DAG(
 )
 download = BashOperator(
     task_id="download",
-    bash_command="pwd && ls -la",
+    bash_command="pwd && ls -la && curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
     dag = dag,
 )
 
 def _get_pictures():
     pathlib.Path("/tmp/images").mkdir(parents=True, exist_ok=True)
+    os.system("pwd && ls -la")
     
-    with open("./lauches.json") as f:
+    with open("/tmp/launches.json") as f:
         launches= json.load(f)
         image_urls =[launch["image"] for launch in launches["results"]]
         
