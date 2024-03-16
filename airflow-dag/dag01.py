@@ -11,14 +11,14 @@ dag = DAG(
 )
 download = BashOperator(
     task_id="download",
-    bash_command="echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf > /dev/null && curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
+    bash_command="pwd && ls -la",
     dag = dag,
 )
 
 def _get_pictures():
     pathlib.Path("/tmp/images").mkdir(parents=True, exist_ok=True)
     
-    with open("/tmp/lauches.json") as f:
+    with open("./lauches.json") as f:
         launches= json.load(f)
         image_urls =[launch["image"] for launch in launches["results"]]
         
