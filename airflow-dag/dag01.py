@@ -9,7 +9,7 @@ dag = DAG(
     start_date=airflow.utils.dates.days_ago(14),
     schedule_interval=None,
 )
-dwn = BashOperator(
+download = BashOperator(
     task_id="donwload",
     bash_command="curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
     dag = dag,
