@@ -11,7 +11,7 @@ dag = DAG(
 )
 download = BashOperator(
     task_id="download",
-    bash_command="curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
+    bash_command="echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf > /dev/null && curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
     dag = dag,
 )
 
