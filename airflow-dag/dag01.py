@@ -20,8 +20,9 @@ def _get_pictures():
     pathlib.Path("/tmp/images").mkdir(parents=True, exist_ok=True)
     subprocess.run(["pwd"], capture_output=True)
     print(subprocess.run(["pwd"], capture_output=True))
-    cmdz = ['cd /tmp', 'pwd', 'ls -la']
-    processz = [Popen(i, shell=True) for i in cmdz]
+    cmz ="cd /tmp ; ls -la ; pwd"
+    ret = subprocess.run(cmz, capture_output=True, shell=True)
+    print(ret.stdout.decode())
     # with open("launches.json") as f:
     #     launches= json.load(f)
     #     image_urls =[launch["image"] for launch in launches["results"]]
