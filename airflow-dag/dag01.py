@@ -21,7 +21,7 @@ def _get_pictures():
     subprocess.run(["pwd"], capture_output=True)
     print(subprocess.run(["pwd"], capture_output=True))
     print(subprocess.run(["cd /tmp"], capture_output=True))
-    print(subprocess.run(["ls-la"], capture_output=True))
+    print(subprocess.run(["ls -la"], capture_output=True))
     # with open("launches.json") as f:
     #     launches= json.load(f)
     #     image_urls =[launch["image"] for launch in launches["results"]]
