@@ -20,8 +20,6 @@ def _get_pictures():
     pathlib.Path("/tmp/images").mkdir(parents=True, exist_ok=True)
     subprocess.run(["pwd"], capture_output=True)
     print(subprocess.run(["pwd"], capture_output=True))
-    subprocess.run(["cd","/tmp"], capture_output=True)
-    print(subprocess.run(["cd","/tmp"], capture_output=True))
     subprocess.run(["ls", " -la"], capture_output=True)
     print(subprocess.run(["ls", " -la"], capture_output=True))
     # with open("launches.json") as f:
@@ -44,7 +42,7 @@ get_pictures = PythonOperator(
 
 notify = BashOperator(
     task_id="notify",
-    bash_command='echo "There are ... images." && pwd',
+    bash_command='echo "There are ... images." && cd /tmp && ls -la',
     dag=dag,
 )
 
