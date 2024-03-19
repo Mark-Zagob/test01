@@ -1,4 +1,4 @@
-import json, pathlib, airflow, requests, os
+import json, pathlib, airflow, requests, os, subprocess
 import requests.exceptions as requests_exceptions
 from airflow import DAG
 from airflow.operators.bash import BashOperator
@@ -17,8 +17,9 @@ download = BashOperator(
 
 def _get_pictures():
     pathlib.Path("./images").mkdir(parents=True, exist_ok=True)
-    
-    with open("./launches.json") as f:
+    print(subprocess.run(["ls", "-la"]))
+    print(subprocess.run(["pwd"]))
+    with open("launches.json") as f:
         launches= json.load(f)
         image_urls =[launch["image"] for launch in launches["results"]]
         
