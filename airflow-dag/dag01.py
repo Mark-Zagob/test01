@@ -19,19 +19,19 @@ def _get_pictures():
     pathlib.Path("./images").mkdir(parents=True, exist_ok=True)
     print(subprocess.run(["ls", "-la"]))
     print(subprocess.run(["pwd"]))
-    with open("launches.json") as f:
-        launches= json.load(f)
-        image_urls =[launch["image"] for launch in launches["results"]]
+    # with open("launches.json") as f:
+    #     launches= json.load(f)
+    #     image_urls =[launch["image"] for launch in launches["results"]]
         
-        for image_url in image_urls:
-            try:
-                response = requests.get(image_url)
-                image_filename = image_url.split("/")[-1]
-                target_file = f"./images/{image_filename}"
-            except requests_exceptions.MissingSchema:
-                print(f"{image_url} appears to be an invalid URL.")
-            except requests_exceptions.ConnectionError:
-                print(f"Could not connect to {image_url}.")
+    #     for image_url in image_urls:
+    #         try:
+    #             response = requests.get(image_url)
+    #             image_filename = image_url.split("/")[-1]
+    #             target_file = f"./images/{image_filename}"
+    #         except requests_exceptions.MissingSchema:
+    #             print(f"{image_url} appears to be an invalid URL.")
+    #         except requests_exceptions.ConnectionError:
+    #             print(f"Could not connect to {image_url}.")
 
 get_pictures = PythonOperator(
     task_id="get_pictures", python_callable=_get_pictures, dag=dag
@@ -39,7 +39,7 @@ get_pictures = PythonOperator(
 
 notify = BashOperator(
     task_id="notify",
-    bash_command='echo "There are now $(ls ./images/ | wc -l) images."',
+    bash_command='echo "There are ... images."',
     dag=dag,
 )
 
