@@ -11,7 +11,7 @@ dag = DAG(
 )
 download = BashOperator(
     task_id="download",
-    bash_command="curl -o ./launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming' && ls -la",
+    bash_command="curl -o ./launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming' && ls -la && pwd",
     dag = dag,
 )
 
@@ -41,7 +41,7 @@ get_pictures = PythonOperator(
 
 notify = BashOperator(
     task_id="notify",
-    bash_command='echo "There are ... images."',
+    bash_command='echo "There are ... images." && pwd',
     dag=dag,
 )
 
