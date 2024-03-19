@@ -3,6 +3,7 @@ import requests.exceptions as requests_exceptions
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
+from subprocess import Popen
 
 dag = DAG(
     dag_id="download_rocket",
@@ -11,16 +12,16 @@ dag = DAG(
 )
 download = BashOperator(
     task_id="download",
-    bash_command="curl -o ./launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming' && ls -la && pwd",
+    bash_command="curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming' && cd /tmp/ && ls -la && pwd",
     dag = dag,
 )
 
 def _get_pictures():
-    pathlib.Path("./images").mkdir(parents=True, exist_ok=True)
-    subprocess.run(["ls", "-la"], capture_output=True)
-    print(subprocess.run(["ls", "-la"], capture_output=True))
+    pathlib.Path("/tmp/images").mkdir(parents=True, exist_ok=True)
     subprocess.run(["pwd"], capture_output=True)
     print(subprocess.run(["pwd"], capture_output=True))
+    cmdz = ['cd /tmp', 'pwd', 'ls -la']
+    processz = [Popen(i, shell=True) for i in cmdz]
     # with open("launches.json") as f:
     #     launches= json.load(f)
     #     image_urls =[launch["image"] for launch in launches["results"]]
