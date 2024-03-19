@@ -11,15 +11,14 @@ dag = DAG(
 )
 download = BashOperator(
     task_id="download",
-    bash_command="curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming' && ls -la",
+    bash_command="curl -o ./launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming' && ls -la",
     dag = dag,
 )
 
 def _get_pictures():
-    pathlib.Path("/tmp/images").mkdir(parents=True, exist_ok=True)
-    os.system("pwd && ls -la")
+    pathlib.Path("./images").mkdir(parents=True, exist_ok=True)
     
-    with open("/tmp/launches.json") as f:
+    with open("./launches.json") as f:
         launches= json.load(f)
         image_urls =[launch["image"] for launch in launches["results"]]
         
@@ -27,7 +26,7 @@ def _get_pictures():
             try:
                 response = requests.get(image_url)
                 image_filename = image_url.split("/")[-1]
-                target_file = f"/tmp/images/{image_filename}"
+                target_file = f"./images/{image_filename}"
             except requests_exceptions.MissingSchema:
                 print(f"{image_url} appears to be an invalid URL.")
             except requests_exceptions.ConnectionError:
@@ -39,7 +38,7 @@ get_pictures = PythonOperator(
 
 notify = BashOperator(
     task_id="notify",
-    bash_command='echo "There are now $(ls /tmp/images/ | wc -l) images."',
+    bash_command='echo "There are now $(ls ./images/ | wc -l) images."',
     dag=dag,
 )
 
