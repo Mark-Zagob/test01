@@ -17,8 +17,8 @@ download = BashOperator(
 
 def _get_pictures():
     pathlib.Path("./images").mkdir(parents=True, exist_ok=True)
-    print(subprocess.run(["ls", "-la"]))
-    print(subprocess.run(["pwd"]))
+    subprocess.run(["ls", "-la"])
+    subprocess.run(["pwd"])
     # with open("launches.json") as f:
     #     launches= json.load(f)
     #     image_urls =[launch["image"] for launch in launches["results"]]
