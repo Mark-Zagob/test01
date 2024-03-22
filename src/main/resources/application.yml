@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: cmif-example
+
+springdoc:
+  version: '@springdoc.version@'
+  api-docs:
+    version: openapi_3_1
+  swagger-ui:
+    display-request-duration: true
+    groups-order: DESC
+    operationsSorter: method
+    disable-swagger-default-url: true
+    use-root-path: true
+  show-actuator: true
+server:
+  port: 8081
+  forward-headers-strategy: framework
