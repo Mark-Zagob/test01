@@ -8,17 +8,17 @@ jobs:
       labels: test01
     strategy:
       matrix:
-        python-version: ["pypy3.9", "pypy3.10", "3.9", "3.10", "3.11", "3.12"]
+        maven: [ '3.8.8', '3.9.6' ]
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: Mark-Zagob/multibranch
-          ref: branch111
+          repository: Mark-Zagob/test01
+          ref: maven-test
       - name: check location
         run: pwd && ls -la
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: run python file
-        run: python ex2.py
+      - name: Set up Maven Action
+        uses: s4u/setup-maven-action@< version >
+      - name: run maven build
+        run: mvn install
+      - name: list all file
+        run: ls -la
