@@ -6,9 +6,9 @@ jobs:
     name: clone another repos
     runs-on: 
       labels: other-runner
-    strategy:
-      matrix:
-        maven: [ '3.9.6' ]
+    # strategy:
+    #   matrix:
+    #     maven: [ '3.9.6' ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -17,10 +17,7 @@ jobs:
       - name: check location
         run: pwd && ls -la
       - name: Set up Maven Action
-        uses: s4u/setup-maven-action@< version >
-        with:
-          java-version: 17
-          maven-version: ${{ matrix.maven }}
+        uses: s4u/setup-maven-action@v1.12.0
       - name: run maven build
         run: mvn install
       - name: list all file
