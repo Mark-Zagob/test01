@@ -5,10 +5,10 @@ jobs:
   clone-repos:
     name: clone another repos
     runs-on: 
-      labels: test01
-    # strategy:
-    #   matrix:
-    #     maven: [ '3.8.8', '3.9.6' ]
+      labels: other-runner
+    strategy:
+      matrix:
+        maven: [ '3.9.6' ]
     steps:
       - uses: actions/checkout@v4
         with:
