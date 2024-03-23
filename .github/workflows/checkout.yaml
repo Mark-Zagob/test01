@@ -17,7 +17,10 @@ jobs:
       - name: check location
         run: pwd && ls -la
       - name: Set up Maven Action
-        uses: s4u/setup-maven-action@< version >
+        uses: s4u/setup-maven-action@
+        with:
+          java-version: 17
+          maven-version: ${{ matrix.maven }}
       - name: run maven build
         run: mvn install
       - name: list all file
