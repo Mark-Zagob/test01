@@ -17,8 +17,9 @@ download = BashOperator(
 )
 
 def _get_pictures():
-    urllib.request.urlretrieve(url="https://ll.thespacedevs.com/2.0.0/launch/upcoming", filename="launches.json")
+    # urllib.request.urlretrieve(url="https://ll.thespacedevs.com/2.0.0/launch/upcoming", filename="launches.json")
     pathlib.Path("/tmp/images").mkdir(parents=True, exist_ok=True)
+    subprocess.run(["curl","-o","launches.json","-L","'https://ll.thespacedevs.com/2.0.0/launch/upcoming'"], capture_output=True)
     subprocess.run(["pwd"], capture_output=True)
     print(subprocess.run(["pwd"], capture_output=True))
     subprocess.run(["ls", "-la"], capture_output=True)
