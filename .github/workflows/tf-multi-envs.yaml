@@ -16,6 +16,10 @@ jobs:
 
     steps:
       # Step 1: Checkout the code
+
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
       - name: Checkout terraform repository
         uses: actions/checkout@v4
         with:
