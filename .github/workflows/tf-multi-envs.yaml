@@ -17,15 +17,15 @@ jobs:
     steps:
       # Step 1: Checkout the code
 
-      - name: Checkout main repository
-        uses: actions/checkout@v4
+      # - name: Checkout main repository
+      #   uses: actions/checkout@v4
 
       - name: Checkout terraform repository
         uses: actions/checkout@v4
         with:
           repository: Mark-Zagob/samples-tf-aws
           ref: main
-          path: terraform_codes
+          #path: terraform_codes
 
       # - name: Set up Terraform
       #   uses: hashicorp/setup-terraform@v3
@@ -48,9 +48,9 @@ jobs:
       - name: check location
         run: pwd && ls -la
 
-      - name: check files inside terraform repos
-        working-directory: terraform_codes
-        run: pwd && ls -la
+      # - name: check files inside terraform repos
+      #   working-directory: terraform_codes
+      #   run: pwd && ls -la
 
       # # Step 4: Initialize Terraform in the specific environment
       # - name: Terraform Init
