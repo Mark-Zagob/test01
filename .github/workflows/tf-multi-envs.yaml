@@ -74,12 +74,12 @@ jobs:
         run: terraform init
 
 
-      # # Step 5: Terraform Plan
-      # - name: Terraform Plan
-      #   working-directory: live/${{ env.environment }}
-      #   run: terraform plan
+      # Step 5: Terraform Plan
+      - name: Terraform Plan
+        working-directory: live/${{ env.environment }}
+        run: terraform plan
 
-      # # Step 6: Terraform Apply
-      # - name: Terraform Apply
-      #   working-directory: live/${{ env.environment }}
-      #   run: terraform apply --auto-approve
+      # Step 6: Terraform Apply
+      - name: Terraform Apply
+        working-directory: live/${{ env.environment }}
+        run: terraform apply --auto-approve
