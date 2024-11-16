@@ -29,7 +29,9 @@ jobs:
 
       # setup nodejs
       - name: setup nodejs
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
       # setup terraform  
       - name: Set up Terraform
