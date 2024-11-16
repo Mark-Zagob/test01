@@ -27,38 +27,42 @@ jobs:
           ref: main
           path: terraform_codes
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+      # - name: Set up Terraform
+      #   uses: hashicorp/setup-terraform@v3
 
 
-      # Step 2: Set environment variable based on input or branch
-      - name: Set Environment
-        id: set-env
-        run: |
-          echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+      # # Step 2: Set environment variable based on input or branch
+      # - name: Set Environment
+      #   id: set-env
+      #   run: |
+      #     echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
 
 
-      # Step 3: Configure Terraform environment (e.g., credentials)
-      - name: Set Terraform Credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: echo "AWS credentials set."
+      # # Step 3: Configure Terraform environment (e.g., credentials)
+      # - name: Set Terraform Credentials
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #   run: echo "AWS credentials set."
 
       - name: check location
         run: pwd && ls -la
 
-      # Step 4: Initialize Terraform in the specific environment
-      - name: Terraform Init
-        working-directory: terraform_codes/live/${{ env.environment }}
-        run: terraform init
+      - name: check files inside terraform repos
+        working-directory: terraform_codes
+        run: pwd && ls -la
 
-      # Step 5: Terraform Plan
-      - name: Terraform Plan
-        working-directory: terraform_codes/live/${{ env.environment }}
-        run: terraform plan
+      # # Step 4: Initialize Terraform in the specific environment
+      # - name: Terraform Init
+      #   working-directory: terraform_codes/live/${{ env.environment }}
+      #   run: terraform init
 
-      # Step 6: Terraform Apply
-      - name: Terraform Apply
-        working-directory: terraform_codes/live/${{ env.environment }}
-        run: terraform apply --auto-approve
+      # # Step 5: Terraform Plan
+      # - name: Terraform Plan
+      #   working-directory: terraform_codes/live/${{ env.environment }}
+      #   run: terraform plan
+
+      # # Step 6: Terraform Apply
+      # - name: Terraform Apply
+      #   working-directory: terraform_codes/live/${{ env.environment }}
+      #   run: terraform apply --auto-approve
