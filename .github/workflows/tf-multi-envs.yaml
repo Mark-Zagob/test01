@@ -40,17 +40,20 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: echo "AWS credentials set."
 
+      - name: check location
+        run: pwd && ls -la
+
       # Step 4: Initialize Terraform in the specific environment
-      - name: Terraform Init
-        working-directory: live/${{ env.environment }}
-        run: terraform init
+      # - name: Terraform Init
+      #   working-directory: live/${{ env.environment }}
+      #   run: terraform init
 
-      # Step 5: Terraform Plan
-      - name: Terraform Plan
-        working-directory: live/${{ env.environment }}
-        run: terraform plan
+      # # Step 5: Terraform Plan
+      # - name: Terraform Plan
+      #   working-directory: live/${{ env.environment }}
+      #   run: terraform plan
 
-      # Step 6: Terraform Apply
-      - name: Terraform Apply
-        working-directory: live/${{ env.environment }}
-        run: terraform apply --auto-approve
+      # # Step 6: Terraform Apply
+      # - name: Terraform Apply
+      #   working-directory: live/${{ env.environment }}
+      #   run: terraform apply --auto-approve
