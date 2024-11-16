@@ -29,13 +29,15 @@ jobs:
 
       # setup nodejs
       - name: setup nodejs
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '16'
 
       # setup terraform  
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
 
 
       # Step 2: Set environment variable based on input or branch
