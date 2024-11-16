@@ -23,7 +23,7 @@ jobs:
       - name: Checkout terraform repository
         uses: actions/checkout@v4
         with:
-          name: Mark-Zagob/samples-tf-aws
+          repository: Mark-Zagob/samples-tf-aws
           ref: main
           path: terraform_codes
 
