@@ -54,6 +54,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-southeast-2
 
+      - name: Debug AWS profiles
+        run: cat ~/.aws/credentials || echo "No credentials file found"
+        
       # Step 3: Configure Terraform environment (e.g., credentials)
       # - name: Set Terraform Credentials
       #   env:
@@ -69,17 +72,17 @@ jobs:
       #   run: pwd && ls -la
 
       # Step 4: Initialize Terraform in the specific environment
-      - name: Terraform Init
-        working-directory: live/${{ env.environment }}
-        run: terraform init
+      # - name: Terraform Init
+      #   working-directory: live/${{ env.environment }}
+      #   run: terraform init
 
 
-      # Step 5: Terraform Plan
-      - name: Terraform Plan
-        working-directory: live/${{ env.environment }}
-        run: terraform plan
+      # # Step 5: Terraform Plan
+      # - name: Terraform Plan
+      #   working-directory: live/${{ env.environment }}
+      #   run: terraform plan
 
-      # Step 6: Terraform Apply
-      - name: Terraform Apply
-        working-directory: live/${{ env.environment }}
-        run: terraform apply --auto-approve
+      # # Step 6: Terraform Apply
+      # - name: Terraform Apply
+      #   working-directory: live/${{ env.environment }}
+      #   run: terraform apply --auto-approve
