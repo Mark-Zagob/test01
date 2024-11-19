@@ -59,14 +59,15 @@ jobs:
 
 
       # create terraform cache
-      - name: Create Terraform Plugin Cache Dir
-        run: mkdir --parents $TF_PLUGIN_CACHE_DIR
+      # - name: Create Terraform Plugin Cache Dir
+      #   run: mkdir --parents $TF_PLUGIN_CACHE_DIR
 
-      - name: Cache Terraform
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+      # - name: Cache Terraform
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+      #     key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+      - uses: terraform-cache/terraform-cache@v1
 
       # Step 4: Initialize Terraform in the specific environment
       - name: Terraform Init
