@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 env:
   TF_CLOUD_ORGANIZATION: "Mark_Zagob"
-  TF_API_TOKEN: "${{ secrets.TF__CLOUD_API_TOKEN }}"
+  TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
   TF_WORKSPACE: "sample-tf-aws"
   #CONFIG_DIRECTORY: "./"
 
