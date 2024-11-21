@@ -1,8 +1,8 @@
-name: "Terraform Flow Plan"
+name: "Terraform Cloud Flow Plan"
 
 on:
   pull_request:
-
+  workflow_dispatch:
 env:
   TF_CLOUD_ORGANIZATION: "Mark_Zagob"
   TF_API_TOKEN: "${{ secrets.TF__CLOUD_API_TOKEN }}"
@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Mark-Zagob/samples-tf-aws
-          ref: main
+          ref: tf-cloud
 
       - name: Upload Configuration
         uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
