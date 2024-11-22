@@ -11,8 +11,8 @@ env:
 
 jobs:
   terraform:
-    runs-on: 
-      labels: arc-runner-sa
+    runs-on: ubuntu-latest
+      #labels: arc-runner-sa
     permissions:
       contents: read
       pull-requests: write
