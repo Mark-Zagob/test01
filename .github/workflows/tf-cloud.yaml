@@ -12,7 +12,7 @@ env:
 jobs:
   terraform:
     runs-on: 
-      labels: arc-runner-001
+      labels: arc-runner-sa
     permissions:
       contents: read
       pull-requests: write
@@ -30,7 +30,7 @@ jobs:
           workspace: ${{ env.TF_WORKSPACE }}
           directory: ${{ env.CONFIG_DIRECTORY }}
           speculative: true
-          timeout: 300
+          token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Create Plan Run
         uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
