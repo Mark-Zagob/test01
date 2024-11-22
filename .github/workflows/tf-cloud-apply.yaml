@@ -1,9 +1,7 @@
 name: "Terraform Cloud Flow Apply"
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 env:
   TF_CLOUD_ORGANIZATION: "Mark_Zagob"
