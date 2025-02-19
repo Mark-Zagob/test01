@@ -64,5 +64,5 @@ jobs:
           print("Current directory:", os.getcwd())
 
   thirst_job:
-    uses: ./.github/workflows/run-kubectl.yaml
+    uses: ./.github/workflows/reuse-workflow.yaml
     needs: first_job
