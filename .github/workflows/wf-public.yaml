@@ -43,6 +43,7 @@ jobs:
         run: |
           ls -la
           pwd
+          lsb_release -a
       
       - name: workflow inputs
         run: |
@@ -51,3 +52,12 @@ jobs:
           echo "Tag source: ${{ inputs.tag }}"
           echo "Environment ${{ inputs.environment }}"
         if: ${{  github.event_name == 'workflow_dispatch'  }}
+  
+  second_job:
+    runs-on: ubuntu-20.04
+    needs: first_job
+    steps:
+      - name: check os version
+        run: |
+          lsb_release -a
+          echo Job: ${{ github.job }}
