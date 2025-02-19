@@ -8,6 +8,7 @@ on:
       homedrive:
         description: 'The home drive on the machine'
         required: true
+        default: "/home"
       logLevel:
         description: 'Log level'
         default: 'warning'
