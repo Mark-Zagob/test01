@@ -62,7 +62,6 @@ jobs:
           x = "Dung"
           print(f'Hello {x} to gh action')
           print("Current directory:", os.getcwd())
-          print("::set-output name=myOutput::Hello from Python")
 
   thirst_job:
     uses: ./.github/workflows/reuse-workflow.yaml
