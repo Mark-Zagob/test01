@@ -17,10 +17,6 @@ on:
         - info
         - warning
         - debug
-      tag:
-        description: 'Apply tag after successfull test run'
-        required: true
-        type: boolean
       environment:
         description: 'Environment to run tests against'
         type: environment
@@ -31,7 +27,7 @@ jobs:
   # This workflow contains a single job called "build"
   first_job:
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout repos
@@ -42,20 +38,17 @@ jobs:
 
       - name: list file and location
         run: |
-          ls -la
-          pwd
           lsb_release -a
       
       - name: workflow inputs
         run: |
           echo "Homedrive: ${{ inputs.homedrive }}"
           echo "Log level: ${{ inputs.logLevel }}"
-          echo "Tag source: ${{ inputs.tag }}"
           echo "Environment ${{ inputs.environment }}"
         if: ${{  github.event_name == 'workflow_dispatch'  }}
   
   second_job:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: first_job
     steps:
       - name: check os version
@@ -69,3 +62,7 @@ jobs:
           x = "Dung"
           print(f'Hello {x} to gh action')
           print("Current directory:", os.getcwd())
+
+  thirst_job:
+    uses: ./.github/workflows/run-kubectl.yaml
+    needs: first_job
