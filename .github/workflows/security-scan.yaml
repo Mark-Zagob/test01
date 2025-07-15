@@ -25,18 +25,28 @@ jobs:
           output: 'trivy-results.sarif'
           severity: 'CRITICAL'
     
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'docker.io/dzagob/python_app:fake-log-v3'
+          format: 'table'
+          #exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
       - name: check files
         run: |
             ls -la
 
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-repo-report
-          path: ./trivy-results.sarif
+    #   - name: upload artifacts
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: trivy-repo-report
+    #       path: ./trivy-results.sarif
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-          category: trivy-scan
+    #   - name: Upload Trivy scan results to GitHub Security tab
+    #     uses: github/codeql-action/upload-sarif@v3
+    #     with:
+    #       sarif_file: 'trivy-results.sarif'
+    #       category: trivy-scan
