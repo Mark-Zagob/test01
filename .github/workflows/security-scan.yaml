@@ -29,22 +29,22 @@ jobs:
         uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: 'docker.io/dzagob/python_app:fake-log-v3'
-          format: 'template'
-          #exit-code: '1'
+          format: 'json'
+          exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          output: 'image-report.html'
+          output: 'image-report.json'
           severity: 'CRITICAL,HIGH'
 
       - name: check files
         run: |
             ls -la
 
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-report
-          path: ./image-report.html
+      # - name: upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: trivy-report
+      #     path: ./image-report.json
 
     #   - name: Upload Trivy scan results to GitHub Security tab
     #     uses: github/codeql-action/upload-sarif@v3
