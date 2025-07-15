@@ -21,3 +21,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL'
+    
+      - name: check files
+        run: |
+            ls -la
