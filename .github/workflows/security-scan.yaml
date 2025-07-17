@@ -19,6 +19,8 @@ jobs:
       docker-in-docker:
         image: docker:dind
         options: --privileged
+        env:
+          DOCKER_TLS_CERTDIR: ""  # Vô hiệu hóa TLS
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,10 +28,8 @@ jobs:
       - name: Verify Docker
         run: |
           docker version
-          docker build .  # Ví dụ build image
         env:
-          DOCKER_HOST: tcp://docker-in-docker:2376
-          DOCKER_TLS_VERIFY: 0
+          DOCKER_HOST: tcp://docker-in-docker:2375
       # - name: triy scan repo 
       #   uses: aquasecurity/trivy-action@0.28.0
       #   with:
