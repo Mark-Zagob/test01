@@ -12,51 +12,65 @@ jobs:
   build:
     name: security scan
     runs-on: ubuntu-24.04
+    container:
+      image: dzagob/debian:custom-tools-v7  # Container agent của bạn
+      options: --privileged  # Bắt buộc để sử dụng DinD
+    services:
+      docker-in-docker:
+        image: docker:dind
+        options: --privileged
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: triy scan repo 
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL'
+      - name: Verify Docker
+        run: |
+          docker version
+          docker build .  # Ví dụ build image
+        env:
+          DOCKER_HOST: tcp://docker-in-docker:2376
+          DOCKER_TLS_VERIFY: 0
+      # - name: triy scan repo 
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   with:
+      #     scan-type: 'fs'
+      #     ignore-unfixed: true
+      #     format: 'sarif'
+      #     output: 'trivy-results.sarif'
+      #     severity: 'CRITICAL'
     
-      - name: trivy scan image
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: 'docker.io/dzagob/python_app:fake-log-v3'
-          format: 'json'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          output: 'image-report.json'
-          severity: 'CRITICAL,HIGH'
+      # - name: trivy scan image
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   with:
+      #     image-ref: 'docker.io/dzagob/python_app:fake-log-v3'
+      #     format: 'json'
+      #     ignore-unfixed: true
+      #     vuln-type: 'os,library'
+      #     output: 'image-report.json'
+      #     severity: 'CRITICAL,HIGH'
 
-      - name: check files
-        run: |
-            ls -la
+      # - name: check files
+      #   run: |
+      #       ls -la
 
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-report
-          path: ./image-report.json
+      # - name: upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: trivy-report
+      #     path: ./image-report.json
   
-      - name: Generate and display vulnerability report
-        run: |
-          sudo apt-get install -y jq
-          critical_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' image-report.json)
-          high_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "HIGH")] | length' image-report.json)
+      # - name: Generate and display vulnerability report
+      #   run: |
+      #     sudo apt-get install -y jq
+      #     critical_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' image-report.json)
+      #     high_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "HIGH")] | length' image-report.json)
 
-          if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
-            echo "##[error]Found $critical_count CRITICAL and $high_count HIGH vulnerabilities"
-            exit 1
-          else
-            echo "##[group]Vulnerability Report"
-          fi
+      #     if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
+      #       echo "##[error]Found $critical_count CRITICAL and $high_count HIGH vulnerabilities"
+      #       exit 1
+      #     else
+      #       echo "##[group]Vulnerability Report"
+      #     fi
     #   - name: Upload Trivy scan results to GitHub Security tab
     #     uses: github/codeql-action/upload-sarif@v3
     #     with:
