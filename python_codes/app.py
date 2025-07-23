@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @app.route('/')
 def hello_world():
     logger.info("Truy cập endpoint /")
-    return jsonify(message='Test, Merge')
+    return jsonify(message='Hello World!')
 
 @app.route('/error')
 def trigger_error():

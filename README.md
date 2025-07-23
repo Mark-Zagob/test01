@@ -1,5 +1,5 @@
 ## Description
-Sample security CI workflows 
+- Branch clone from develop to test issues and PR
 
 ## Feature
 - Using security tools to scan and display vulnerability
