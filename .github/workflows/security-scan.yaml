@@ -8,71 +8,157 @@ on:
 permissions:
   security-events: write
   contents: read
+  actions: read
 jobs:
-  build:
-    name: security scan
+  repos-scan:
+    name: repos-scan
     runs-on: ubuntu-24.04
-    container:
-      image: dzagob/debian:custom-tools-v7  # Container agent của bạn
-      options: --privileged  # Bắt buộc để sử dụng DinD
-    services:
-      docker-in-docker:
-        image: docker:dind
-        options: --privileged
-        env:
-          DOCKER_TLS_CERTDIR: ""  # Vô hiệu hóa TLS
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: triy scan repo 
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'repo-report.sarif'
+          severity: 'CRITICAL'
+
+      - name: check file
+        run: |
+          ls -la
+
+      - name: Upload code report
+        uses: actions/upload-artifact@v3
+        with:
+          name: repo-report
+          path: ./repo-report.sarif
+    
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'repo-report.sarif'
+          category: repo-report
+  image-scan:
+    name: image-scan
+    runs-on: ubuntu-24.04
+    needs: repos-scan
+    # container:
+    #   image: dzagob/debian:custom-tools-v7  # Container agent của bạn
+    #   options: --privileged  # Bắt buộc để sử dụng DinD
+    #   volumes: 
+    #     - /var/run/docker.sock:/var/run/docker.sock
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify Docker
+      - name: Build and scan image
+        working-directory: ./python_codes/
         run: |
-          docker version
-        env:
-          DOCKER_HOST: tcp://docker-in-docker:2375
-      # - name: triy scan repo 
-      #   uses: aquasecurity/trivy-action@0.28.0
-      #   with:
-      #     scan-type: 'fs'
-      #     ignore-unfixed: true
-      #     format: 'sarif'
-      #     output: 'trivy-results.sarif'
-      #     severity: 'CRITICAL'
+            docker build -t dzagob/python_app:flask-test .
+
     
-      # - name: trivy scan image
-      #   uses: aquasecurity/trivy-action@0.28.0
-      #   with:
-      #     image-ref: 'docker.io/dzagob/python_app:fake-log-v3'
-      #     format: 'json'
-      #     ignore-unfixed: true
-      #     vuln-type: 'os,library'
-      #     output: 'image-report.json'
-      #     severity: 'CRITICAL,HIGH'
+      - name: trivy scan image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'dzagob/python_app:flask-test'
+          format: 'json'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          output: 'image-report.json'
+          severity: 'CRITICAL,HIGH'
 
-      # - name: check files
-      #   run: |
-      #       ls -la
+      - name: check files
+        run: |
+            ls -la
 
-      # - name: upload artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: trivy-report
-      #     path: ./image-report.json
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: ./image-report.json
   
-      # - name: Generate and display vulnerability report
-      #   run: |
-      #     sudo apt-get install -y jq
-      #     critical_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' image-report.json)
-      #     high_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "HIGH")] | length' image-report.json)
+      - name: Generate and display vulnerability report
+        run: |
+          sudo apt-get install -y jq
+          critical_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' image-report.json)
+          high_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "HIGH")] | length' image-report.json)
 
-      #     if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
-      #       echo "##[error]Found $critical_count CRITICAL and $high_count HIGH vulnerabilities"
-      #       exit 1
-      #     else
-      #       echo "##[group]Vulnerability Report"
-      #     fi
-    #   - name: Upload Trivy scan results to GitHub Security tab
-    #     uses: github/codeql-action/upload-sarif@v3
-    #     with:
-    #       sarif_file: 'trivy-results.sarif'
-    #       category: trivy-scan
+          if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
+            echo "##[error]Found $critical_count CRITICAL and $high_count HIGH vulnerabilities"
+            exit 1
+          else
+            echo "##[group]Vulnerability Report"
+          fi
+
+  notify_failure:
+    runs-on: 
+      labels: cmif-raas  
+    needs: [repos-scan, image-scan]
+    if: ${{ failure() }}
+    outputs:
+      issue_number: ${{ steps.set_output.outputs.issue_number }}
+    steps:
+      - name: Create issue
+        id: create-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const prLink = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/pull/${context.issue.number}`;
+              const response = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `[Scan Failed] Security scan failed in PR #${context.issue.number}`,
+                body: `Security scan failed in workflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nRelated PR: ${prLink}`
+              });
+              
+              // Lưu issue number vào biến môi trường
+              core.exportVariable('ISSUE_NUMBER', response.data.number);
+              return response.data.number;
+            } catch (error) {
+              core.error(`Failed to create issue: ${error}`);
+              core.setOutput('number', '0'); // Trả về '0' khi có lỗi
+              return 0;
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+
+  report-to-pr:
+    name: Report results to PR
+    runs-on: 
+      labels: cmif-raas  
+    needs: [repos-scan, image-scan, notify_failure]  # Đợi cả 2 job hoàn thành
+    if: ${{ github.event_name == 'pull_request' && failure() }} # Chỉ chạy khi là PR
+    
+    steps:
+      - name: Comment on PR with issue link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Lấy issue number từ output
+            const issueNumber = "${{ needs.notify_failure.outputs.issue_number }}";
+            console.log(`Received issue number: ${issueNumber}`);
+                      
+            // Kiểm tra nếu issueNumber hợp lệ
+            let issueLink = '';
+            if (issueNumber && issueNumber !== '0' && issueNumber !== '') {
+              issueLink = `\n\n⚠️ An issue has been created for this failure: [#${issueNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/issues/${issueNumber})`;
+            }
+            // Tạo nội dung comment
+            const commentBody = `❌ Security scans failed! [View details](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})${issueLink}`;
+            console.log(`Comment body: ${commentBody}`);
+
+            // Tạo comment trong PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
