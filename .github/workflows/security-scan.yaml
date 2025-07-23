@@ -165,7 +165,7 @@ jobs:
 
   report-to-pr:
     name: Report results to PR
-    runs-on: ubuntu-24.04 
+    runs-on: ubuntu-24.04
     needs: [code-scan, repos-scan, image-scan, notify_failure]  # Đợi cả 2 job hoàn thành
     if: ${{ github.event_name == 'pull_request' && failure() }} # Chỉ chạy khi là PR
     
