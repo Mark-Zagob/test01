@@ -132,6 +132,7 @@ jobs:
 
   notify_failure:
     runs-on: ubuntu-24.04
+    permissions: write-all
     needs: [code-scan, repos-scan, image-scan]
     if: ${{ failure() }}
     outputs:
@@ -139,7 +140,7 @@ jobs:
     steps:
       - name: Create issue
         id: create-issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             try {
@@ -166,12 +167,13 @@ jobs:
   report-to-pr:
     name: Report results to PR
     runs-on: ubuntu-24.04
+    permissions: write-all
     needs: [code-scan, repos-scan, image-scan, notify_failure]  # Đợi cả 2 job hoàn thành
     if: ${{ github.event_name == 'pull_request' && failure() }} # Chỉ chạy khi là PR
     
     steps:
       - name: Comment on PR with issue link
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             // Lấy issue number từ output
