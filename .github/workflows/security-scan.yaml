@@ -9,49 +9,70 @@ permissions:
   security-events: write
   contents: read
 jobs:
-  build:
-    name: security scan
+  repos-scan:
+    name: repos-scan
     runs-on: ubuntu-24.04
-    container:
-      image: dzagob/debian:custom-tools-v7  # Container agent của bạn
-      options: --privileged  # Bắt buộc để sử dụng DinD
-    services:
-      docker-in-docker:
-        image: docker:dind
-        options: --privileged
-        env:
-          DOCKER_TLS_CERTDIR: ""  # Vô hiệu hóa TLS
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: triy scan repo 
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'repo-report.sarif'
+          severity: 'CRITICAL'
+
+      - name: check file
+        run: |
+          ls -la
+
+      # - name: Upload code report
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: repo-report
+      #     path: ./repo-report.sarif
+    
+      # - name: Upload Trivy scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: 'repo-report.sarif'
+      #     category: repo-report
+  image-scan:
+    name: image-scan
+    runs-on: ubuntu-24.04
+    needs: repos-scan
+    # container:
+    #   image: dzagob/debian:custom-tools-v7  # Container agent của bạn
+    #   options: --privileged  # Bắt buộc để sử dụng DinD
+    #   volumes: 
+    #     - /var/run/docker.sock:/var/run/docker.sock
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify Docker
+      - name: Build and scan image
+        working-directory: ./python_codes/
         run: |
-          docker version
-        env:
-          DOCKER_HOST: tcp://docker-in-docker:2375
-      # - name: triy scan repo 
-      #   uses: aquasecurity/trivy-action@0.28.0
-      #   with:
-      #     scan-type: 'fs'
-      #     ignore-unfixed: true
-      #     format: 'sarif'
-      #     output: 'trivy-results.sarif'
-      #     severity: 'CRITICAL'
-    
-      # - name: trivy scan image
-      #   uses: aquasecurity/trivy-action@0.28.0
-      #   with:
-      #     image-ref: 'docker.io/dzagob/python_app:fake-log-v3'
-      #     format: 'json'
-      #     ignore-unfixed: true
-      #     vuln-type: 'os,library'
-      #     output: 'image-report.json'
-      #     severity: 'CRITICAL,HIGH'
+            docker build -t dzagob/python_app:flask-test .
 
-      # - name: check files
-      #   run: |
-      #       ls -la
+    
+      - name: trivy scan image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'dzagob/python_app:flask-test'
+          format: 'json'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          output: 'image-report.json'
+          severity: 'CRITICAL,HIGH'
+
+      - name: check files
+        run: |
+            ls -la
 
       # - name: upload artifacts
       #   uses: actions/upload-artifact@v4
