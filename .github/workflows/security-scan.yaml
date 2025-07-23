@@ -80,20 +80,84 @@ jobs:
       #     name: trivy-report
       #     path: ./image-report.json
   
-      # - name: Generate and display vulnerability report
-      #   run: |
-      #     sudo apt-get install -y jq
-      #     critical_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' image-report.json)
-      #     high_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "HIGH")] | length' image-report.json)
+      - name: Generate and display vulnerability report
+        run: |
+          sudo apt-get install -y jq
+          critical_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' image-report.json)
+          high_count=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "HIGH")] | length' image-report.json)
 
-      #     if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
-      #       echo "##[error]Found $critical_count CRITICAL and $high_count HIGH vulnerabilities"
-      #       exit 1
-      #     else
-      #       echo "##[group]Vulnerability Report"
-      #     fi
-    #   - name: Upload Trivy scan results to GitHub Security tab
-    #     uses: github/codeql-action/upload-sarif@v3
-    #     with:
-    #       sarif_file: 'trivy-results.sarif'
-    #       category: trivy-scan
+          if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ]; then
+            echo "##[error]Found $critical_count CRITICAL and $high_count HIGH vulnerabilities"
+            exit 1
+          else
+            echo "##[group]Vulnerability Report"
+          fi
+
+  # notify_failure:
+  #   runs-on: 
+  #     labels: cmif-raas  
+  #   needs: [repos-scan, image-scan]
+  #   if: ${{ failure() }}
+  #   outputs:
+  #     issue_number: ${{ steps.set_output.outputs.issue_number }}
+  #   steps:
+  #     - name: Create issue
+  #       id: create-issue
+  #       uses: actions/github-script@v7
+  #       with:
+  #         script: |
+  #           try {
+  #             const prLink = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/pull/${context.issue.number}`;
+  #             const response = await github.rest.issues.create({
+  #               owner: context.repo.owner,
+  #               repo: context.repo.repo,
+  #               title: `[Scan Failed] Security scan failed in PR #${context.issue.number}`,
+  #               body: `Security scan failed in workflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nRelated PR: ${prLink}`
+  #             });
+              
+  #             // Lưu issue number vào biến môi trường
+  #             core.exportVariable('ISSUE_NUMBER', response.data.number);
+  #             return response.data.number;
+  #           } catch (error) {
+  #             core.error(`Failed to create issue: ${error}`);
+  #             core.setOutput('number', '0'); // Trả về '0' khi có lỗi
+  #             return 0;
+  #           }
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+
+  # report-to-pr:
+  #   name: Report results to PR
+  #   runs-on: 
+  #     labels: cmif-raas  
+  #   needs: [repos-scan, image-scan, notify_failure]  # Đợi cả 2 job hoàn thành
+  #   if: ${{ github.event_name == 'pull_request' && failure() }} # Chỉ chạy khi là PR
+    
+  #   steps:
+  #     - name: Comment on PR with issue link
+  #       uses: actions/github-script@v7
+  #       with:
+  #         script: |
+  #           // Lấy issue number từ output
+  #           const issueNumber = "${{ needs.notify_failure.outputs.issue_number }}";
+  #           console.log(`Received issue number: ${issueNumber}`);
+                      
+  #           // Kiểm tra nếu issueNumber hợp lệ
+  #           let issueLink = '';
+  #           if (issueNumber && issueNumber !== '0' && issueNumber !== '') {
+  #             issueLink = `\n\n⚠️ An issue has been created for this failure: [#${issueNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/issues/${issueNumber})`;
+  #           }
+  #           // Tạo nội dung comment
+  #           const commentBody = `❌ Security scans failed! [View details](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})${issueLink}`;
+  #           console.log(`Comment body: ${commentBody}`);
+
+  #           // Tạo comment trong PR
+  #           await github.rest.issues.createComment({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             issue_number: context.issue.number,
+  #             body: commentBody
+  #           });
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
