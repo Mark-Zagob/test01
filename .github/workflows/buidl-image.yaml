@@ -9,7 +9,7 @@ jobs:
   build-image:
     runs-on: ubuntu-24.04
     container:
-      image: dzagob/debian:custom-tools-distroless
+      image: dzagob/debian:custom-tools-alpine-v1
       volumes: 
         - /var/run/docker.sock:/var/run/docker.sock
     steps:
