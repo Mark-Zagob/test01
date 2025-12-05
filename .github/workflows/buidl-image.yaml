@@ -1,0 +1,27 @@
+name: build image
+on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+  workflow_dispatch:
+jobs:
+  build-image:
+    runs-on: ubuntu-24.04
+    container:
+      image: dzagob/debian:custom-tools-distroless
+      volumes: 
+        - /var/run/docker.sock:/var/run/docker.sock
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: verify command
+        run: |
+          python --version
+          docker --version
