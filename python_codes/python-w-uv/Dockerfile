@@ -14,9 +14,9 @@ ENV UV_COMPILE_BYTECODE=1 \
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies vào virtual environment
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project
-
+# RUN --mount=type=cache,target=/root/.cache/uv \
+#     uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev --no-install-project
 # ============ Stage 2: Runtime ============
 FROM python:3.11-slim
 

@@ -29,8 +29,6 @@ jobs:
 
       - name: build image with uv python
         working-directory: ./python_codes/python-w-uv/
-        env:
-          DOCKER_BUILDKIT: 1
         run: |
           docker build -t dzagob/python_app:uv .
 
