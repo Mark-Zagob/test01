@@ -31,4 +31,14 @@ jobs:
         working-directory: ./python_codes/python-w-uv/
         run: |
           docker build -t dzagob/python_app:uv .
-          docker images
+
+      - name: Compare build times
+        run: |
+          echo "=== Building with pip ==="
+          time docker build -t dzagob/python_app:pip ./python_codes/python-w-pip/
+          
+          echo "=== Building with uv ==="
+          time docker build -t dzagob/python_app:uv ./python_codes/python-w-uv/
+          
+          echo "=== Image sizes ==="
+          docker images | grep python_app

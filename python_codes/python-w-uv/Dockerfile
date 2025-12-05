@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.19
+
 # ============ Stage 1: Dependencies ============
 FROM python:3.11-slim AS builder
 
@@ -8,8 +10,12 @@ WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
+# Copy dependency files (tận dụng layer caching)
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+
+# Install dependencies vào virtual environment
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
 
 # ============ Stage 2: Runtime ============
 FROM python:3.11-slim
@@ -19,16 +25,23 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 WORKDIR /app
 
-# Copy Python environment từ builder
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+# Copy virtual environment từ builder (thay vì copy system packages)
+COPY --from=builder /app/.venv /app/.venv
 
 # Copy source code
 COPY --chown=appuser:appuser . .
 
+# Switch to non-root user
 USER appuser
+
 EXPOSE 5000
 
+# Thêm venv vào PATH để dùng Python và packages từ venv
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')" || exit 1
 
