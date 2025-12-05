@@ -12,6 +12,8 @@ jobs:
       image: dzagob/debian:custom-tools-alpine-root
       volumes: 
         - /var/run/docker.sock:/var/run/docker.sock
+    env:
+      DOCKER_BUILDKIT: 1
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
