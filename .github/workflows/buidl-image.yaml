@@ -21,3 +21,14 @@ jobs:
           ls -la
           pwd
           docker --version
+      
+      - name: build image with pip python
+        working-directory: ./python_codes/python-w-pip/
+        run: |
+          docker build -t dzagob/python_app:pip .
+
+      - name: build image with uv python
+        working-directory: ./python_codes/python-w-uv/
+        run: |
+          docker build -t dzagob/python_app:uv .
+          docker images
