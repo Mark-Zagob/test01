@@ -14,9 +14,9 @@ ENV UV_COMPILE_BYTECODE=1 \
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies vào virtual environment
-# RUN --mount=type=cache,target=/root/.cache/uv \
-#     uv sync --frozen --no-dev --no-install-project
-RUN uv sync --frozen --no-dev --no-install-project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
+# RUN uv sync --frozen --no-dev --no-install-project
 # ============ Stage 2: Runtime ============
 FROM python:3.11-slim
 
@@ -25,11 +25,10 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 WORKDIR /app
 
-# Copy virtual environment từ builder (thay vì copy system packages)
-COPY --from=builder /app/.venv /app/.venv
-
-# Copy source code
 COPY --chown=appuser:appuser . .
+
+# Sau đó copy .venv (sẽ KHÔNG bị override vì .dockerignore đã ignore .venv/)
+COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
 
 # Switch to non-root user
 USER appuser
