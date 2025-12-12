@@ -11,6 +11,7 @@ build
 .git
 .gitignore
 .env
+.env.local
 .venv
 venv/
 *.log
@@ -20,3 +21,13 @@ htmlcov/
 *.md
 Dockerfile*
 docker-compose*.yml
+.dockerignore
+tests/
+.mypy_cache/
+.ruff_cache/
+.github/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

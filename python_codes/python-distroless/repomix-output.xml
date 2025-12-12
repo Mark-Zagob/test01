@@ -1,0 +1,324 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.dockerignore
+app.py
+config.py
+Dockerfile
+gunicorn_config.py
+pyproject.toml
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".dockerignore">
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+.git
+.gitignore
+.env
+.venv
+venv/
+*.log
+.pytest_cache
+.coverage
+htmlcov/
+*.md
+Dockerfile*
+docker-compose*.yml
+</file>
+
+<file path="app.py">
+import logging
+import os
+from flask import Flask, jsonify, request
+from logging.handlers import RotatingFileHandler
+
+# Khởi tạo Flask app
+app = Flask(__name__)
+
+# Configuration từ environment variables
+class Config:
+    DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+    LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+    
+app.config.from_object(Config)
+
+# Cấu hình logging tốt hơn
+def setup_logging():
+    log_level = getattr(logging, app.config['LOG_LEVEL'])
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    console_handler.setFormatter(console_formatter)
+    
+    # Configure root logger
+    logging.basicConfig(level=log_level, handlers=[console_handler])
+    
+    return logging.getLogger(__name__)
+
+logger = setup_logging()
+
+# Request logging middleware
+@app.before_request
+def log_request_info():
+    logger.info(f'{request.method} {request.path} - IP: {request.remote_addr}')
+
+@app.after_request
+def log_response_info(response):
+    logger.info(f'{request.method} {request.path} - Status: {response.status_code}')
+    return response
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    logger.warning(f'404 - {request.path}')
+    return jsonify(error='Resource not found'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f'500 - {str(error)}')
+    return jsonify(error='Internal server error'), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logger.exception(f'Unhandled exception: {str(e)}')
+    return jsonify(error='An unexpected error occurred'), 500
+
+# Routes
+@app.route('/')
+def hello_world():
+    logger.info("Truy cập endpoint /")
+    return jsonify(message='Test, Merge', version='0.1.0')
+
+@app.route('/health')
+def health():
+    """Health check endpoint for Docker"""
+    return jsonify(status='healthy', service='myapp'), 200
+
+@app.route('/ready')
+def ready():
+    """Readiness probe - check if app can handle requests"""
+    # Có thể thêm logic kiểm tra database, cache, etc.
+    return jsonify(status='ready'), 200
+
+@app.route('/error')
+def trigger_error():
+    logger.error("Đã xảy ra lỗi mẫu!")
+    return jsonify(error="This is a sample error"), 500
+
+if __name__ == '__main__':
+    # Only for development
+    app.run(host='0.0.0.0', port=5000, debug=app.config['DEBUG'])
+</file>
+
+<file path="config.py">
+import os
+from typing import Optional
+
+class Config:
+    """Base configuration"""
+    DEBUG = False
+    TESTING = False
+    LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-prod')
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    LOG_LEVEL = 'DEBUG'
+
+class ProductionConfig(Config):
+    DEBUG = False
+    LOG_LEVEL = 'INFO'
+
+class TestingConfig(Config):
+    TESTING = True
+    LOG_LEVEL = 'DEBUG'
+
+def get_config(env: Optional[str] = None) -> Config:
+    env = env or os.getenv('FLASK_ENV', 'production')
+    configs = {
+        'development': DevelopmentConfig,
+        'production': ProductionConfig,
+        'testing': TestingConfig,
+    }
+    return configs.get(env, ProductionConfig)
+</file>
+
+<file path="Dockerfile">
+# syntax=docker/dockerfile:1
+
+# ============ Stage 1: Builder ============
+FROM python:3.11-slim AS builder
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+WORKDIR /app
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+COPY pyproject.toml uv.lock ./
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
+
+# ============ Stage 2: Runtime (Distroless) ============
+FROM gcr.io/distroless/python3-debian12:nonroot
+
+WORKDIR /app
+
+# Copy venv từ builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy source code
+COPY --chown=nonroot:nonroot . .
+
+# --- KHẮC PHỤC Ở ĐÂY ---
+
+# 1. Thay vì dùng bin/gunicorn, ta trỏ thẳng vào site-packages để Python nhận diện thư viện
+# Lưu ý: Phải đúng version python (3.11)
+ENV PYTHONPATH="/app/.venv/lib/python3.11/site-packages"
+
+# 2. Chạy gunicorn bằng cách gọi module (-m) thông qua trình thông dịch Python của hệ thống
+# Distroless đã có sẵn python trong path
+ENTRYPOINT ["python", "-m", "gunicorn", "--config", "gunicorn_config.py", "app:app"]
+</file>
+
+<file path="gunicorn_config.py">
+import multiprocessing
+import os
+
+# Bind
+bind = "0.0.0.0:5000"
+
+# Workers
+# Công thức: (2 x CPU cores) + 1
+workers = int(os.getenv('GUNICORN_WORKERS', multiprocessing.cpu_count() * 2 + 1))
+worker_class = 'sync'  # hoặc 'gevent' cho async
+worker_connections = 1000
+max_requests = 1000  # Restart worker sau N requests (tránh memory leak)
+max_requests_jitter = 50  # Random jitter để tránh restart cùng lúc
+timeout = 30  # Worker timeout (seconds)
+keepalive = 2
+
+# Logging
+accesslog = "-"  # stdout
+errorlog = "-"   # stdout
+loglevel = os.getenv('LOG_LEVEL', 'info')
+access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
+
+# Preload app để tiết kiệm memory
+preload_app = True
+
+# Graceful timeout
+graceful_timeout = 30
+
+# Security
+limit_request_line = 4094
+limit_request_fields = 100
+limit_request_field_size = 8190
+
+# Process naming
+proc_name = 'myapp'
+
+# Server hooks (optional)
+def on_starting(server):
+    server.log.info("Gunicorn server starting")
+
+def on_reload(server):
+    server.log.info("Gunicorn server reloading")
+
+def when_ready(server):
+    server.log.info("Gunicorn server ready")
+
+def on_exit(server):
+    server.log.info("Gunicorn server shutting down")
+</file>
+
+<file path="pyproject.toml">
+[project]
+name = "myapp"
+version = "0.1.0"
+description = "My Flask Application"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.1.1",
+    "gunicorn>=22.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "black>=24.0.0",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+</file>
+
+</files>
