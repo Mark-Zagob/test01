@@ -1,0 +1,40 @@
+name: data-mesh-hands-on
+on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+  workflow_dispatch:
+jobs:
+  build-and-test:
+    runs-on:
+      labels: my_runner_001
+    services:
+      # DevOps cung cấp sẵn DB để test, Dev không cần cài
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: ecommerce_mesh
+        ports:
+          - 5432:5432
+        # Health check để đảm bảo DB sẵn sàng trước khi chạy test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        working-directory: ./handson-datamesh
+        run: |
+          pip install -r requirements.txt
