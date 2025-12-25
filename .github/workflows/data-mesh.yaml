@@ -29,7 +29,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Create virtual env
+        run: |
+          mkdir -p venv
+          python3 -m venv venv
+
       - name: Install Dependencies
         working-directory: ./handson-datamesh
         run: |
-          pwd
+          source ../venv/bin/activate
+          pip install requirements.txt
