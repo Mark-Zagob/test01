@@ -1,3 +1,5 @@
 pandas
 sqlalchemy
-contract_enforcer
+PyYAML
+cerberus
+pandas
