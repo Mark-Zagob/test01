@@ -170,7 +170,7 @@ deploy_minio_bucket() {
     # Create folder structure
     # MinIO creates folders automatically when you put an object
     # We'll create a .keep file to ensure folder exists
-    echo "" | mc pipe "$MINIO_ALIAS/$bucket_name/$folder_path/.keep"
+    echo "Placeholder file to maintain folder structure" | mc pipe "$MINIO_ALIAS/$bucket_name/$folder_path/.keep"
     
     log_info "Folder structure created ✓"
 }
