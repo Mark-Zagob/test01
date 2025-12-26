@@ -1,0 +1,61 @@
+{
+  "type": "record",
+  "name": "OrderCompleted",
+  "namespace": "com.company.datamesh.orders",
+  "doc": "Event phát sinh khi một đơn hàng được hoàn thành thành công",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": "string",
+      "doc": "ID duy nhất của đơn hàng (UUID format)"
+    },
+    {
+      "name": "customer_id",
+      "type": "string",
+      "doc": "ID của khách hàng đặt đơn"
+    },
+    {
+      "name": "total_amount",
+      "type": "double",
+      "doc": "Tổng giá trị đơn hàng sau khi áp dụng discount"
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "default": "VND",
+      "doc": "Loại tiền tệ (VND, USD, EUR)"
+    },
+    {
+      "name": "items_count",
+      "type": "int",
+      "doc": "Số lượng sản phẩm trong đơn hàng"
+    },
+    {
+      "name": "payment_method",
+      "type": "string",
+      "doc": "Phương thức thanh toán (COD, CREDIT_CARD, BANK_TRANSFER, MOMO, ZALOPAY)"
+    },
+    {
+      "name": "completed_at",
+      "type": "long",
+      "doc": "Thời điểm hoàn thành đơn hàng (Unix timestamp milliseconds)"
+    },
+    {
+      "name": "completed_date",
+      "type": "string",
+      "doc": "Ngày hoàn thành (YYYY-MM-DD) - dùng để partition"
+    },
+    {
+      "name": "shipping_address",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Địa chỉ giao hàng (null nếu là đơn pickup)"
+    },
+    {
+      "name": "notes",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Ghi chú của khách hàng"
+    }
+  ]
+}

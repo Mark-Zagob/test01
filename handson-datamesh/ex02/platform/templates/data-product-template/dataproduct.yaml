@@ -1,0 +1,61 @@
+# ============================================================
+# DATA PRODUCT MANIFEST
+# File này mô tả data product là gì, ai sở hữu, hoạt động thế nào
+# ============================================================
+
+# ---------------------------
+# THÔNG TIN CƠ BẢN
+# ---------------------------
+apiVersion: datamesh/v1          # Version của template (để sau này upgrade)
+kind: DataProduct                 # Loại resource
+
+metadata:
+  name: ""                        # Tên data product (VD: orders-completed)
+  domain: ""                      # Domain sở hữu (VD: orders, customers, inventory)
+  version: "1.0.0"                # Semantic versioning
+  
+  owner:
+    team: ""                      # Team sở hữu (VD: orders-team)
+    email: ""                     # Email liên hệ
+    slack: ""                     # Slack channel (optional)
+
+  tags:                           # Tags để tìm kiếm, phân loại
+    - ""
+
+# ---------------------------
+# MÔ TẢ DATA PRODUCT
+# ---------------------------
+spec:
+  description: ""                 # Mô tả ngắn gọn data product làm gì
+  
+  # ---------------------------
+  # INPUT: Data đến từ đâu?
+  # ---------------------------
+  input:
+    - name: ""                    # Tên source
+      type: ""                    # kafka-topic | postgres | api | s3
+      connection: ""              # Connection string hoặc topic name
+
+  # ---------------------------
+  # OUTPUT: Data được publish ở đâu?
+  # ---------------------------
+  output:
+    - name: ""                    # Tên output
+      type: ""                    # kafka-topic | s3
+      target: ""                  # Topic name hoặc S3 path
+      format: ""                  # avro | json | parquet
+      schema: "./schema/schema.avsc"  # Path tới schema file
+
+  # ---------------------------
+  # SLA: Cam kết chất lượng dịch vụ
+  # ---------------------------
+  sla:
+    freshness: ""                 # Data không được cũ quá (VD: 5m, 1h, 1d)
+    availability: ""              # Uptime cam kết (VD: 99.9%)
+    updateFrequency: ""           # Tần suất cập nhật (VD: realtime, hourly, daily)
+
+  # ---------------------------
+  # QUALITY: Link tới file quality rules
+  # ---------------------------
+  quality:
+    expectations: "./quality/expectations.yaml"

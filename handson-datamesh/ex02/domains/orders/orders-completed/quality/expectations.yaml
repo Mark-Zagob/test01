@@ -1,0 +1,98 @@
+# ============================================================
+# DATA QUALITY: Orders Completed
+# ============================================================
+
+version: "1.0"
+
+metadata:
+  data_product: "orders-completed"
+  last_updated: "2025-12-26"
+  owner: "orders-team@company.com"
+
+expectations:
+
+  # ----- Field-level checks -----
+  fields:
+    - name: "order_id"
+      rules:
+        - type: not_null
+        - type: unique
+        - type: regex_match
+          pattern: "^[a-f0-9-]{36}$"
+          description: "Must be valid UUID format"
+        
+    - name: "customer_id"
+      rules:
+        - type: not_null
+        
+    - name: "total_amount"
+      rules:
+        - type: not_null
+        - type: greater_than
+          value: 0
+          
+    - name: "currency"
+      rules:
+        - type: not_null
+        - type: in_set
+          values: ["VND", "USD", "EUR"]
+          
+    - name: "items_count"
+      rules:
+        - type: not_null
+        - type: greater_than
+          value: 0
+          
+    - name: "payment_method"
+      rules:
+        - type: not_null
+        - type: in_set
+          values: ["COD", "CREDIT_CARD", "BANK_TRANSFER", "MOMO", "ZALOPAY"]
+          
+    - name: "completed_at"
+      rules:
+        - type: not_null
+        - type: not_in_future
+          
+    - name: "completed_date"
+      rules:
+        - type: not_null
+        - type: regex_match
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          description: "Must be YYYY-MM-DD format"
+
+  # ----- Row-level checks -----
+  rows:
+    - type: no_duplicates
+      columns: ["order_id"]
+      description: "Each order should appear only once"
+      
+  # ----- Dataset-level checks -----
+  dataset:
+    - type: row_count_min
+      value: 1
+      description: "Dataset should not be empty"
+      
+    - type: freshness
+      max_age: "5m"
+      description: "Data should not be older than 5 minutes"
+
+# ----- Alert Configuration -----
+alerts:
+  on_failure:
+    - type: slack
+      channel: "#orders-alerts"
+    - type: email
+      recipients: 
+        - "orders-team@company.com"
+        - "data-platform@company.com"
+      
+  severity:
+    critical:
+      - "order_id.not_null"
+      - "order_id.unique"
+      - "customer_id.not_null"
+      - "total_amount.greater_than"
+    warning:
+      - "freshness"
+      - "currency.in_set"

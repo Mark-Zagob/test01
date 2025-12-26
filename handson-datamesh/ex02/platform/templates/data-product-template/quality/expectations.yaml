@@ -1,0 +1,66 @@
+# ============================================================
+# DATA QUALITY EXPECTATIONS
+# File này định nghĩa các rules để validate data
+# ============================================================
+
+version: "1.0"
+
+# ---------------------------
+# THÔNG TIN CHUNG
+# ---------------------------
+metadata:
+  data_product: ""              # Tên data product
+  last_updated: ""              # Ngày cập nhật rules
+  owner: ""                     # Người chịu trách nhiệm
+
+# ---------------------------
+# QUALITY RULES
+# ---------------------------
+expectations:
+
+  # ----- Field-level checks -----
+  fields:
+    - name: ""                  # Tên field
+      rules:
+        - type: not_null        # Field không được null
+        
+    - name: ""
+      rules:
+        - type: unique          # Giá trị phải unique
+        
+    - name: ""
+      rules:
+        - type: greater_than    # Giá trị phải lớn hơn X
+          value: 0
+          
+    - name: ""
+      rules:
+        - type: in_set          # Giá trị phải nằm trong tập cho trước
+          values: []
+
+  # ----- Row-level checks -----
+  rows:
+    - type: no_duplicates       # Không có row trùng lặp
+      columns: []               # Dựa trên các columns nào
+      
+  # ----- Dataset-level checks -----
+  dataset:
+    - type: row_count_min       # Số row tối thiểu
+      value: 1
+      
+    - type: freshness           # Data không được cũ quá X
+      max_age: ""               # VD: 5m, 1h, 1d
+
+# ---------------------------
+# ALERT CONFIG
+# ---------------------------
+alerts:
+  on_failure:
+    - type: slack
+      channel: ""
+    - type: email
+      recipients: []
+      
+  severity:
+    critical: []                # Rules nào là critical
+    warning: []                 # Rules nào là warning

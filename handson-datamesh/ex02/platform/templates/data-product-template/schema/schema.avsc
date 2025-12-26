@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "DataProductTemplate",
+  "namespace": "com.company.datamesh",
+  "doc": "Mô tả ngắn về data product này",
+  "fields": [
+    {
+      "name": "example_field",
+      "type": "string",
+      "doc": "Mô tả field này"
+    }
+  ]
+}

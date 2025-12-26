@@ -1,0 +1,54 @@
+# ============================================================
+# DATA PRODUCT: Orders Completed
+# Domain: Orders
+# ============================================================
+
+apiVersion: datamesh/v1
+kind: DataProduct
+
+metadata:
+  name: "orders-completed"
+  domain: "orders"
+  version: "1.0.0"
+  
+  owner:
+    team: "orders-team"
+    email: "orders-team@company.com"
+    slack: "#orders-data"
+
+  tags:
+    - "orders"
+    - "transactions"
+    - "revenue"
+
+spec:
+  description: "Chứa thông tin các đơn hàng đã hoàn thành. Được sử dụng để tính revenue, phân tích hành vi mua hàng."
+  
+  input:
+    - name: orders-database
+      type: postgres
+      connection: "postgres://orders-db:5432/orders"
+      table: "orders"
+      filter: "status = 'completed'"
+
+  output:
+    - name: kafka-stream
+      type: kafka-topic
+      target: "orders.completed.v1"
+      format: avro
+      schema: "./schema/schema.avsc"
+      
+    - name: data-lake
+      type: s3
+      target: "s3://datalake/orders/completed/"
+      format: parquet
+      partitionBy: "completed_date"
+      schema: "./schema/schema.avsc"
+
+  sla:
+    freshness: "5m"
+    availability: "99.9%"
+    updateFrequency: "realtime"
+
+  quality:
+    expectations: "./quality/expectations.yaml"
