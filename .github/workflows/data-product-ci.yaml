@@ -10,12 +10,12 @@ on:
     branches:
       - main
     paths:
-      - 'domains/**'
-#   pull_request:
-#     branches:
-#       - main
-#     paths:
-#       - 'domains/**'
+      - './handson-datamesh/ex02/domains/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - './handson-datamesh/ex02/domains/**'
   workflow_dispatch:
 
 env:
