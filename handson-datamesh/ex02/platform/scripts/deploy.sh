@@ -153,11 +153,14 @@ deploy_minio_bucket() {
     # Extract bucket name (first part)
     local bucket_name=$(echo "$path_without_prefix" | cut -d'/' -f1)
     
-    # Extract folder path (rest)
-    local folder_path=$(echo "$path_without_prefix" | cut -d'/' -f2-)
+    # Extract folder path (rest) - remove trailing slash
+    local folder_path=$(echo "$path_without_prefix" | cut -d'/' -f2- | sed 's|/$||')
     
     log_info "Bucket: $bucket_name"
     log_info "Folder: $folder_path"
+    
+    # ===== DEBUG =====
+    log_info "DEBUG - Full MinIO path: $MINIO_ALIAS/$bucket_name/$folder_path/.keep"
     
     # Create bucket if not exists
     if ! mc ls "$MINIO_ALIAS/$bucket_name" > /dev/null 2>&1; then
@@ -167,12 +170,16 @@ deploy_minio_bucket() {
         log_warn "Bucket $bucket_name already exists"
     fi
     
-    # ===== SỬA PHẦN NÀY =====
-    # Tạo file .keep với nội dung thực sự
-    echo "Placeholder file to maintain folder structure" | mc pipe "$MINIO_ALIAS/$bucket_name/$folder_path/.keep"
+    # ===== SỬA CÁCH TẠO FILE =====
+    # Dùng mc cp thay vì mc pipe
+    local temp_file=$(mktemp)
+    echo "Placeholder file" > "$temp_file"
+    mc cp "$temp_file" "$MINIO_ALIAS/$bucket_name/$folder_path/.keep"
+    rm -f "$temp_file"
     
     log_info "Folder structure created ✓"
 }
+
 # ---------------------------
 # MAIN
 # ---------------------------
