@@ -6,11 +6,11 @@
 name: Data Product CI/CD
 
 on:
-#   push:
-#     branches:
-#       - main
-#     paths:
-#       - 'domains/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'domains/**'
 #   pull_request:
 #     branches:
 #       - main
