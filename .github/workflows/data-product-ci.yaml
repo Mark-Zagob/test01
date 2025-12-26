@@ -58,8 +58,8 @@ jobs:
           
           # Extract unique data product paths
           DATA_PRODUCTS=$(echo "$CHANGED_FILES" | \
-            grep "^domains/" | \
-            cut -d'/' -f1-3 | \
+            grep "/domains/" | \
+            sed 's|.*\(domains/[^/]*/[^/]*\).*|\1|' | \
             sort -u | \
             jq -R -s -c 'split("\n") | map(select(length > 0))')
           
