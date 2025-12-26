@@ -9,13 +9,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      - './handson-datamesh/ex02/domains/**'
+    # paths:
+    #   - './handson-datamesh/ex02/domains/**'
   pull_request:
     branches:
       - main
-    paths:
-      - './handson-datamesh/ex02/domains/**'
+    # paths:
+    #   - './handson-datamesh/ex02/domains/**'
   workflow_dispatch:
 
 env:
