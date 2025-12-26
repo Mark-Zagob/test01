@@ -167,14 +167,12 @@ deploy_minio_bucket() {
         log_warn "Bucket $bucket_name already exists"
     fi
     
-    # Create folder structure
-    # MinIO creates folders automatically when you put an object
-    # We'll create a .keep file to ensure folder exists
+    # ===== SỬA PHẦN NÀY =====
+    # Tạo file .keep với nội dung thực sự
     echo "Placeholder file to maintain folder structure" | mc pipe "$MINIO_ALIAS/$bucket_name/$folder_path/.keep"
     
     log_info "Folder structure created ✓"
 }
-
 # ---------------------------
 # MAIN
 # ---------------------------
