@@ -1,0 +1,127 @@
+# ============================================================
+# DATA PRODUCT CI/CD PIPELINE
+# Tự động validate và deploy data products khi có thay đổi
+# ============================================================
+
+name: Data Product CI/CD
+
+on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'domains/**'
+#   pull_request:
+#     branches:
+#       - main
+#     paths:
+#       - 'domains/**'
+  workflow_dispatch:
+
+env:
+  SCHEMA_REGISTRY_URL: ${{ vars.SCHEMA_REGISTRY_URL }}
+  KAFKA_BOOTSTRAP_SERVER: ${{ vars.KAFKA_BOOTSTRAP_SERVER }}
+  MINIO_ENDPOINT: ${{ vars.MINIO_ENDPOINT }}
+  MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+  MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+
+jobs:
+  # ---------------------------
+  # JOB 1: Detect changed data products
+  # ---------------------------
+  detect-changes:
+    name: Detect Changed Data Products
+    runs-on:
+      labels: my_runner_001
+    outputs:
+      data_products: ${{ steps.detect.outputs.data_products }}
+      has_changes: ${{ steps.detect.outputs.has_changes }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed data products
+        id: detect
+        run: |
+          # Get changed files
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1)
+          fi
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Extract unique data product paths
+          DATA_PRODUCTS=$(echo "$CHANGED_FILES" | \
+            grep "^domains/" | \
+            cut -d'/' -f1-3 | \
+            sort -u | \
+            jq -R -s -c 'split("\n") | map(select(length > 0))')
+          
+          echo "Data products to process: $DATA_PRODUCTS"
+          
+          if [[ "$DATA_PRODUCTS" == "[]" ]]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "data_products=$DATA_PRODUCTS" >> $GITHUB_OUTPUT
+          fi
+
+  # ---------------------------
+  # JOB 2: Validate data products
+  # ---------------------------
+  validate:
+    name: Validate
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on:
+      labels: my_runner_001
+    strategy:
+      matrix:
+        data_product: ${{ fromJson(needs.detect-changes.outputs.data_products) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+
+      - name: Validate data product
+        working-directory: ./handson-datamesh/ex02/
+        run: |
+          chmod +x platform/scripts/validate.sh
+          ./platform/scripts/validate.sh ${{ matrix.data_product }}
+
+  # ---------------------------
+  # JOB 3: Deploy data products (only on main branch)
+  # ---------------------------
+  deploy:
+    name: Deploy
+    needs: [detect-changes, validate]
+    if: |
+      needs.detect-changes.outputs.has_changes == 'true' && 
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push'
+    runs-on:
+      labels: my_runner_001
+    strategy:
+      matrix:
+        data_product: ${{ fromJson(needs.detect-changes.outputs.data_products) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure MinIO client
+        run: |
+          mc alias set myminio ${{ env.MINIO_ENDPOINT }} ${{ env.MINIO_ACCESS_KEY }} ${{ env.MINIO_SECRET_KEY }}
+
+      - name: Deploy data product
+        working-directory: ./handson-datamesh/ex02/
+        run: |
+          chmod +x platform/scripts/deploy.sh
+          ./platform/scripts/deploy.sh ${{ matrix.data_product }}
